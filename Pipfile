@@ -1,0 +1,16 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+setuptools = "==49.6.0"
+wheel = "==0.35.1"
+twine = "==3.2.0"
+python-decouple = "==3.3"
+pytest = "*"
+
+[packages]
+
+[requires]
+python_version = "3.7"
