@@ -10,8 +10,13 @@ class CsvFiles(Files):
         super().__init__(base_dir, extension, start_file_filter, end_file_filter,
                          include_processed, CsvFile)
 
-    def to_sql_server(self, sql_server, table_schema, table_name, use_existing_sql_table):
-        pass
+    def to_sql_server(self, sql_configuration, use_existing=False, low_memory=True):
+        for csv_file in self.__iter__():
+            if isinstance(csv_file, CsvFile):
+                csv_file.to_sql_server(
+                    pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(low_memory=low_memory),
+                    sql_configuration=sql_configuration
+                )
 
     def get_dataframe_utf8_encoding_with_header(self, column_data_type_dict=None, low_memory=True):
         df_final = pd.DataFrame()
