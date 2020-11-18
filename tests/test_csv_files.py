@@ -58,7 +58,7 @@ class TestProjectMethods(unittest.TestCase):
         self.assertEqual(len(content.split("\n")), 4)
         UtilForTesting.file_teardown(temp_dir)
 
-        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_1',
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_2',
                                                                             extension="",
                                                                             content="col1,col2\ntest1,test2",
                                                                             count=2)

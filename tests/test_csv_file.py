@@ -1,6 +1,7 @@
 import unittest
 from zeppos_csv.csv_file import CsvFile
 from tests.util_for_testing import UtilForTesting
+from zeppos_bcpy.sql_configuration import SqlConfiguration
 import os
 
 
@@ -11,7 +12,7 @@ class TestProjectMethods(unittest.TestCase):
     def test_get_dataframe_windows_encoding_with_chunking_method(self):
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_1', content="col1,col2\ntest1,test2")
         df = CsvFile(full_file_name_list[0]).get_dataframe_windows_encoding_with_chunking()
-        self.assertEqual(df.get_chunk().shape[0], 1)
+        self.assertEqual(1, df.get_chunk().shape[0])
         UtilForTesting.file_teardown(temp_dir)
 
     def test_get_dataframe_utf8_encoding_with_header_method(self):
@@ -22,7 +23,7 @@ class TestProjectMethods(unittest.TestCase):
         self.assertEqual(df.columns[1], 'col2')
 
         UtilForTesting.file_teardown(temp_dir)
-    #
+
     def test_get_dataframe_utf8_encoding_without_header_method(self):
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_1', content="test1,test2")
         df = CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_without_header(['col1', 'col2'])
@@ -85,6 +86,45 @@ class TestProjectMethods(unittest.TestCase):
         self.assertEqual(os.path.exists(os.path.splitext(full_file_name_list[0])[0]), True)
 
         UtilForTesting.file_teardown(temp_dir)
+
+    def test_to_sql_server_method(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready', '', content="seconds,minutes\n3600,12\n")
+
+        csv_file = CsvFile(full_file_name_list[0])
+        return_df = CsvFile(full_file_name_list[0]).to_sql_server(
+            pandas_dataframe=csv_file.get_dataframe_windows_encoding_with_chunking(batch_size=2),
+            sql_configuration=SqlConfiguration(
+                server_type="microsoft",
+                server_name="localhost\\sqlexpress",
+                database_name="master",
+                schema_name="dbo",
+                table_name="staging_test_to_sql_server"
+            )
+        )
+
+        self.assertEqual(["SECONDS", "MINUTES"], return_df.columns.to_list())
+        UtilForTesting.file_teardown(temp_dir)
+
+    # This will require some more work.
+    # Todo: Complete this.
+    # def test_to_sql_server_with_chunking_method(self):
+    #     temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready', '',
+    #                                                                         content="seconds,minutes\n3600,12\n3600,12\n3600,12\n3600,12\n3600,12\n")
+    #
+    #     csv_file = CsvFile(full_file_name_list[0])
+    #     return_df = CsvFile(full_file_name_list[0]).to_sql_server(
+    #         pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(),
+    #         sql_configuration=SqlConfiguration(
+    #             server_type="microsoft",
+    #             server_name="localhost\\sqlexpress",
+    #             database_name="master",
+    #             schema_name="dbo",
+    #             table_name="staging_test_to_sql_server"
+    #         )
+    #     )
+    #
+    #     # self.assertEqual(["SECONDS", "MINUTES"], return_df.columns.to_list())
+    #     UtilForTesting.file_teardown(temp_dir)
 
 
 if __name__ == '__main__':

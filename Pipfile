@@ -17,10 +17,7 @@ pytest = ">=6.1.2"
 testfixtures = ">=6.15.0"
 
 [packages]
-pandas = ">=1.1.4"
-zeppos-file-manager = ">=0.0.16"
-zeppos-logging = ">=0.0.50"
-zeppos-core = ">=1.0.1"
+zeppos-bcpy = ">=0.0.19"
 
 [requires]
 python_version = "3.7"
