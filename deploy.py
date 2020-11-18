@@ -17,8 +17,6 @@ def update_build_version_no():
 
 
 def main():
-    update_build_version_no()
-
     if os.path.exists('dist'):
         shutil.rmtree('dist')
 
@@ -36,6 +34,9 @@ def main():
 
     if "passed" in out_array[len(out_array)-2]:
         print("Test Passed")
+
+        update_build_version_no()
+
         p = Popen(['pipenv', 'run', 'python', 'setup.py', 'sdist', 'bdist_wheel'])
         p.communicate()
 

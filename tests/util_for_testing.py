@@ -9,7 +9,7 @@ class UtilForTesting:
         else:
             extension = ""
 
-        temp_dir = os.path.join(os.path.dirname(__file__), "temp")
+        temp_dir = UtilForTesting.get_temp_dir()
         file_dir = os.path.join(temp_dir, sub_directory)
         if os.path.exists(file_dir):
             shutil.rmtree(file_dir, ignore_errors=True)
@@ -24,6 +24,11 @@ class UtilForTesting:
         return temp_dir, file_dir, full_file_name_list
 
     @staticmethod
-    def file_teardown(temp_dir):
-        shutil.rmtree(temp_dir, ignore_errors=True)
+    def file_clean_up():
+        shutil.rmtree(UtilForTesting.get_temp_dir(), ignore_errors=True)
+
+    @staticmethod
+    def get_temp_dir():
+        return os.path.join(os.path.dirname(__file__), "temp")
+
 
