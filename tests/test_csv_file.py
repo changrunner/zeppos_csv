@@ -3,7 +3,7 @@ from zeppos_csv.csv_file import CsvFile
 from tests.util_for_testing import UtilForTesting
 from zeppos_bcpy.sql_configuration import SqlConfiguration
 import os
-
+from zeppos_logging.app_logger import AppLogger
 
 class TestProjectMethods(unittest.TestCase):
     def setUp(self):
@@ -15,24 +15,51 @@ class TestProjectMethods(unittest.TestCase):
     def test_constructor_method(self):
         self.assertEqual(str(type(CsvFile(r"c:\temp\test1.csv"))), "<class 'zeppos_csv.csv_file.CsvFile'>")
 
-    def test_get_dataframe_windows_encoding_with_chunking_method(self):
-        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c1', content="col1,col2\ntest1,test2")
-        df = CsvFile(full_file_name_list[0]).get_dataframe_windows_encoding_with_chunking()
-        self.assertEqual(1, df.get_chunk().shape[0])
+    def test_get_dataframe_windows_encoding_with_header(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c1',
+                                                                            content="col1,col2\ntest1,test2")
+        df = CsvFile(full_file_name_list[0]).get_dataframe_windows_encoding_with_header()
+        self.assertEqual(1, df.shape[0])
+
+    def test_get_dataframe_windows_encoding_with_header_and_chunking_method(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c2', content="col1,col2\ntest1,test2")
+        df_chunks = CsvFile(full_file_name_list[0]).get_dataframe_windows_encoding_with_header_and_chunking()
+        self.assertEqual(1, df_chunks.get_chunk().shape[0])
+
+    def test_get_dataframe_windows_encoding_without_header(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c3', content="test1,test2")
+        df = CsvFile(full_file_name_list[0]).get_dataframe_windows_encoding_without_header(['col1','col2'])
+        self.assertEqual(1, df.shape[0])
+
+    def test_get_dataframe_windows_encoding_without_header_and_chunking_method(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c4', content="test1,test2\ntest1,test2\n")
+        df_chunks = CsvFile(full_file_name_list[0]).get_dataframe_windows_encoding_without_header_and_chunking(['col1', 'col2'])
+        self.assertEqual(2, df_chunks.get_chunk().shape[0])
 
     def test_get_dataframe_utf8_encoding_with_header_method(self):
-        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c2', content="col1,col2\ntest1,test2")
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c5', content="col1,col2\ntest1,test2")
         df = CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_with_header()
         self.assertEqual(df.shape[0], 1)
         self.assertEqual(df.columns[0], 'col1')
         self.assertEqual(df.columns[1], 'col2')
 
     def test_get_dataframe_utf8_encoding_without_header_method(self):
-        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c3', content="test1,test2")
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c6', content="test1,test2")
         df = CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_without_header(['col1', 'col2'])
         self.assertEqual(df.shape[0], 1)
         self.assertEqual(df.columns[0], 'col1')
         self.assertEqual(df.columns[1], 'col2')
+
+    def test_get_dataframe_utf8_encoding_with_header_and_chunkung_method(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c7',
+                                                                            content="col1,col2\ntest1,test2")
+        df = CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_with_header_and_chunking()
+        self.assertEqual(df.get_chunk().shape[0], 1)
+
+    def test_get_dataframe_utf8_encoding_without_header_and_chunking_method(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c8', content="test1,test2")
+        df = CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_without_header_and_chunking(['col1', 'col2'])
+        self.assertEqual(df.get_chunk().shape[0], 1)
 
     #################################################
     # Test file_manager.file inherited functionality
@@ -81,10 +108,10 @@ class TestProjectMethods(unittest.TestCase):
         self.assertEqual(os.path.exists(os.path.splitext(full_file_name_list[0])[0]), True)
 
     def test_to_sql_server_method(self):
-        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready', '', content="seconds,minutes\n3600,12\n")
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready1', '', content="seconds,minutes\n3600,12\n")
 
         csv_file = CsvFile(full_file_name_list[0])
-        return_df = CsvFile(full_file_name_list[0]).to_sql_server(
+        return_dict = CsvFile(full_file_name_list[0]).to_sql_server(
             pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(),
             sql_configuration=SqlConfiguration(
                 server_type="microsoft",
@@ -95,27 +122,26 @@ class TestProjectMethods(unittest.TestCase):
             )
         )
 
-        self.assertEqual(["SECONDS", "MINUTES"], return_df.columns.to_list())
+        self.assertEqual(["SECONDS", "MINUTES"], return_dict["columns"])
 
-    # This will require some more work.
-    # Todo: Complete this.
-    # def test_to_sql_server_with_chunking_method(self):
-    #     temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready', '',
-    #                                                                         content="seconds,minutes\n3600,12\n3600,12\n3600,12\n3600,12\n3600,12\n")
-    #
-    #     csv_file = CsvFile(full_file_name_list[0])
-    #     return_df = CsvFile(full_file_name_list[0]).to_sql_server(
-    #         pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(),
-    #         sql_configuration=SqlConfiguration(
-    #             server_type="microsoft",
-    #             server_name="localhost\\sqlexpress",
-    #             database_name="master",
-    #             schema_name="dbo",
-    #             table_name="staging_test_to_sql_server"
-    #         )
-    #     )
-    #
-    #     # self.assertEqual(["SECONDS", "MINUTES"], return_df.columns.to_list())
+    def test_to_sql_server_with_chunking_method(self):
+        # AppLogger.set_debug_level()
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready2', '',
+                                                                            content="seconds,minutes\n3600,12\n3600,13\n3600,14\n3600,15\n3600,16\n")
+
+        csv_file = CsvFile(full_file_name_list[0])
+        return_dict = CsvFile(full_file_name_list[0]).to_sql_server_with_chunking(
+            pandas_dataframe_chunks=csv_file.get_dataframe_windows_encoding_with_header_and_chunking(batch_size=2),
+            sql_configuration=SqlConfiguration(
+                server_type="microsoft",
+                server_name="localhost\\sqlexpress",
+                database_name="master",
+                schema_name="dbo",
+                table_name="staging_test_to_sql_server"
+            )
+        )
+
+        self.assertEqual(["SECONDS", "MINUTES"], return_dict["columns"])
 
 
 if __name__ == '__main__':

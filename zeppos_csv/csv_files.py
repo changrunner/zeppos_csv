@@ -16,9 +16,21 @@ class CsvFiles(Files):
             if isinstance(csv_file, CsvFile):
                 csv_file.to_sql_server(
                     pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(low_memory=low_memory),
-                    sql_configuration=sql_configuration
+                    sql_configuration=sql_configuration,
+                    use_existing=use_existing
                 )
                 use_existing = True  # set to True so we don't keep creating the table.
+
+    # def to_sql_server_with_chunking(self, sql_configuration, use_existing=False, low_memory=True):
+    #     use_existing=use_existing
+    #     for csv_file in self.__iter__():
+    #         if isinstance(csv_file, CsvFile):
+    #             csv_file.to_sql_server_with_chunking(
+    #                 pandas_dataframe_chunks=csv_file.get_dataframe_utf8_encoding_with_header(low_memory=low_memory),
+    #                 sql_configuration=sql_configuration,
+    #                 use_existing=use_existing
+    #             )
+    #             use_existing = True  # set to True so we don't keep creating the table.
 
     def get_dataframe_utf8_encoding_with_header(self, column_data_type_dict=None, low_memory=True):
         df_final = pd.DataFrame()
