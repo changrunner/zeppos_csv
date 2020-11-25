@@ -11,6 +11,10 @@ class CsvFile(File):
         super().__init__(full_file_name)
         self._timer = Timer()
 
+    @staticmethod
+    def create_csv_file_instance_with_todays_date(root_directory, file_name, format="%d_%m_%Y_%H_%M_%S"):
+        return File.create_instance_with_todays_date(root_directory, file_name, CsvFile, format)
+
     def get_dataframe_windows_encoding_with_header(self, low_memory=True):
         return self._get_dataframe(encoding='windows', has_header=True, read_in_chunks=False, low_memory=low_memory)
 
@@ -129,7 +133,7 @@ class CsvFile(File):
     def save_dataframe(self, df, sep="|"):
         try:
             os.makedirs(os.path.dirname(self.full_file_name), exist_ok=True)
-            df.to_csv(self.full_file_name, sep=sep)
+            df.to_csv(self.full_file_name, sep=sep, index=False)
             return True
         except Exception as error:
             AppLogger.logger.error(f"Error occured during csv_file.save_dataframe: {error}")

@@ -4,6 +4,8 @@ from tests.util_for_testing import UtilForTesting
 from zeppos_bcpy.sql_configuration import SqlConfiguration
 import os
 from zeppos_logging.app_logger import AppLogger
+import pandas as pd
+from pandas._testing import assert_frame_equal
 
 class TestProjectMethods(unittest.TestCase):
     def setUp(self):
@@ -142,6 +144,13 @@ class TestProjectMethods(unittest.TestCase):
         )
 
         self.assertEqual(["SECONDS", "MINUTES"], return_dict["columns"])
+
+    def test_save_dataframe_method(self):
+        csv_file = CsvFile(r"c:\temp\test.csv")
+        df_expected = pd.DataFrame({'seconds': [3600], 'minutes': [10]}, columns=['seconds', 'minutes'])
+        csv_file.save_dataframe(df_expected)
+        df_actual = pd.read_csv(r"c:\temp\test.csv", sep="|")
+        assert_frame_equal(df_actual, df_expected)
 
 
 if __name__ == '__main__':
