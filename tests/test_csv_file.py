@@ -39,7 +39,7 @@ class TestProjectMethods(unittest.TestCase):
         self.assertEqual(2, df_chunks.get_chunk().shape[0])
 
     def test_get_dataframe_utf8_encoding_with_header_method(self):
-        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c5', content="col1,col2\ntest1,test2")
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_c5', content="col1|col2\ntest1|test2")
         df = CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_with_header()
         self.assertEqual(df.shape[0], 1)
         self.assertEqual(df.columns[0], 'col1')
@@ -110,7 +110,7 @@ class TestProjectMethods(unittest.TestCase):
         self.assertEqual(os.path.exists(os.path.splitext(full_file_name_list[0])[0]), True)
 
     def test_to_sql_server_method(self):
-        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready1', '', content="seconds,minutes\n3600,12\n")
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready1', '', content="seconds|minutes\n3600|12\n")
 
         csv_file = CsvFile(full_file_name_list[0])
         return_dict = CsvFile(full_file_name_list[0]).to_sql_server(
@@ -129,7 +129,7 @@ class TestProjectMethods(unittest.TestCase):
     def test_to_sql_server_with_chunking_method(self):
         # AppLogger.set_debug_level()
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready2', '',
-                                                                            content="seconds,minutes\n3600,12\n3600,13\n3600,14\n3600,15\n3600,16\n")
+                                                                            content="seconds|minutes\n3600|12\n3600|13\n3600|14\n3600|15\n3600|16\n")
 
         csv_file = CsvFile(full_file_name_list[0])
         return_dict = CsvFile(full_file_name_list[0]).to_sql_server_with_chunking(

@@ -15,35 +15,35 @@ class CsvFile(File):
     def create_csv_file_instance_with_todays_date(root_directory, file_name, format="%Y_%m_%d_%H_%M_%S"):
         return File.create_instance_with_todays_date(root_directory, file_name, CsvFile, format)
 
-    def get_dataframe_windows_encoding_with_header(self, low_memory=True):
-        return self._get_dataframe(encoding='windows', has_header=True, read_in_chunks=False, low_memory=low_memory)
+    def get_dataframe_windows_encoding_with_header(self, low_memory=True, sep="|"):
+        return self._get_dataframe(encoding='windows', has_header=True, read_in_chunks=False, low_memory=low_memory, sep=sep)
 
-    def get_dataframe_windows_encoding_with_header_and_chunking(self, batch_size=1000):
-        return self._get_dataframe(encoding='windows', has_header=True, read_in_chunks=True, batch_size=batch_size)
+    def get_dataframe_windows_encoding_with_header_and_chunking(self, batch_size=1000, sep="|"):
+        return self._get_dataframe(encoding='windows', has_header=True, read_in_chunks=True, batch_size=batch_size, sep=sep)
 
-    def get_dataframe_windows_encoding_without_header(self, column_name_list, low_memory=True):
+    def get_dataframe_windows_encoding_without_header(self, column_name_list, low_memory=True, sep="|"):
         return self._get_dataframe(encoding='windows', has_header=False, read_in_chunks=False,
-                                   column_name_list=column_name_list, low_memory=low_memory)
+                                   column_name_list=column_name_list, low_memory=low_memory, sep=sep)
 
-    def get_dataframe_windows_encoding_without_header_and_chunking(self, column_name_list, batch_size=1000):
+    def get_dataframe_windows_encoding_without_header_and_chunking(self, column_name_list, batch_size=1000, sep="|"):
         return self._get_dataframe(encoding='windows', has_header=False, read_in_chunks=True,
-                                   column_name_list=column_name_list, batch_size=batch_size)
+                                   column_name_list=column_name_list, batch_size=batch_size, sep=sep)
 
-    def get_dataframe_utf8_encoding_with_header(self, low_memory=True):
-        return self._get_dataframe(encoding='utf-8', has_header=True, read_in_chunks=False, low_memory=low_memory)
+    def get_dataframe_utf8_encoding_with_header(self, low_memory=True, sep="|"):
+        return self._get_dataframe(encoding='utf-8', has_header=True, read_in_chunks=False, low_memory=low_memory, sep=sep)
 
-    def get_dataframe_utf8_encoding_with_header_and_chunking(self, low_memory=True):
-        return self._get_dataframe(encoding='utf-8', has_header=True, read_in_chunks=True, low_memory=low_memory)
+    def get_dataframe_utf8_encoding_with_header_and_chunking(self, low_memory=True, sep="|"):
+        return self._get_dataframe(encoding='utf-8', has_header=True, read_in_chunks=True, low_memory=low_memory, sep=sep)
 
-    def get_dataframe_utf8_encoding_without_header(self, column_name_list, low_memory=True):
+    def get_dataframe_utf8_encoding_without_header(self, column_name_list, low_memory=True, sep="|"):
         return self._get_dataframe(encoding='utf-8', has_header=False, read_in_chunks=False,
-                                   column_name_list=column_name_list, low_memory=low_memory)
+                                   column_name_list=column_name_list, low_memory=low_memory, sep=sep)
 
-    def get_dataframe_utf8_encoding_without_header_and_chunking(self, column_name_list, low_memory=True):
+    def get_dataframe_utf8_encoding_without_header_and_chunking(self, column_name_list, low_memory=True, sep="|"):
         return self._get_dataframe(encoding='utf-8', has_header=False, read_in_chunks=True,
-                                   column_name_list=column_name_list, low_memory=low_memory)
+                                   column_name_list=column_name_list, low_memory=low_memory, sep=sep)
 
-    def _get_dataframe(self, encoding, has_header, read_in_chunks, column_name_list=None, batch_size=10000, low_memory=True):
+    def _get_dataframe(self, encoding, has_header, read_in_chunks, column_name_list=None, batch_size=10000, low_memory=True, sep="|"):
         self._timer.start_timer()
         df = None
         try:
@@ -51,31 +51,32 @@ class CsvFile(File):
                 if has_header:
                     if read_in_chunks:
                         df = pd.read_csv(self._full_file_name, iterator=True, chunksize=batch_size, dtype=object,
-                                         low_memory=low_memory)
+                                         low_memory=low_memory, sep=sep)
                     else:
-                        df = pd.read_csv(self._full_file_name, dtype=object, low_memory=low_memory)
+                        df = pd.read_csv(self._full_file_name, dtype=object, low_memory=low_memory, sep=sep)
                 else:
                     if read_in_chunks:
                         df = pd.read_csv(self._full_file_name, iterator=True, chunksize=batch_size, header=None,
-                                         names=column_name_list, dtype=object, low_memory=low_memory)
+                                         names=column_name_list, dtype=object, low_memory=low_memory, sep=sep)
                     else:
                         df = pd.read_csv(self._full_file_name, header=None, names=column_name_list,
-                                         dtype=object, low_memory=low_memory)
+                                         dtype=object, low_memory=low_memory, sep=sep)
             elif encoding == 'windows':
                 if has_header:
                     if read_in_chunks:
                         df = pd.read_csv(self._full_file_name, iterator=True, chunksize=batch_size, dtype=object,
-                                         encoding="ISO-8859-1", engine='python')
+                                         encoding="ISO-8859-1", engine='python', sep=sep)
                     else:
                         df = pd.read_csv(self._full_file_name, dtype=object, encoding="ISO-8859-1", engine='python',
-                                         low_memory=low_memory)
+                                         low_memory=low_memory, sep=sep)
                 else:
                     if read_in_chunks:
                         df = pd.read_csv(self._full_file_name, iterator=True, chunksize=batch_size, header=None,
-                                         names=column_name_list, dtype=object, encoding="ISO-8859-1", engine='python')
+                                         names=column_name_list, dtype=object, encoding="ISO-8859-1", engine='python',
+                                         sep=sep)
                     else:
                         df = pd.read_csv(self._full_file_name, header=None, names=column_name_list, dtype=object,
-                                         encoding="ISO-8859-1", engine='python', low_memory=low_memory)
+                                         encoding="ISO-8859-1", engine='python', low_memory=low_memory, sep=sep)
             self._timer.stop_timer()
             AppLogger.logger.debug(f"==> Read the csv Time: {self._timer.time_elapsed_in_seconds}")
 
