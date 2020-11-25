@@ -12,7 +12,7 @@ class CsvFile(File):
         self._timer = Timer()
 
     @staticmethod
-    def create_csv_file_instance_with_todays_date(root_directory, file_name, format="%d_%m_%Y_%H_%M_%S"):
+    def create_csv_file_instance_with_todays_date(root_directory, file_name, format="%Y_%m_%d_%H_%M_%S"):
         return File.create_instance_with_todays_date(root_directory, file_name, CsvFile, format)
 
     def get_dataframe_windows_encoding_with_header(self, low_memory=True):
