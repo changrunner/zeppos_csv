@@ -3,3 +3,4 @@
 /dist/*
 *.egg-info
 /Pipfile.lock
+__pycache__

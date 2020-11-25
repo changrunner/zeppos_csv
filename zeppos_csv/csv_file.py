@@ -3,8 +3,8 @@ import sys
 from zeppos_core.timer import Timer
 from zeppos_file_manager.file import File
 from zeppos_logging.app_logger import AppLogger
-from zeppos_bcpy.sql_configuration import SqlConfiguration
 from zeppos_bcpy.dataframe import Dataframe
+import os
 
 class CsvFile(File):
     def __init__(self, full_file_name):
@@ -125,4 +125,13 @@ class CsvFile(File):
                 f"Processing of [{total_record_count}] records to load Csv into Sql Server in seconds: {self._timer.time_elapsed_in_seconds}")
 
         return return_dict
+
+    def save_dataframe(self, df, sep="|"):
+        try:
+            os.makedirs(os.path.dirname(self.full_file_name), exist_ok=True)
+            df.to_csv(self.full_file_name, sep=sep)
+            return True
+        except Exception as error:
+            AppLogger.logger.error(f"Error occured during csv_file.save_dataframe: {error}")
+            return False
 
