@@ -132,8 +132,10 @@ class CsvFile(File):
 
     def save_dataframe(self, df, sep="|"):
         try:
+            AppLogger.logger.debug("Saving dataframe to file.")
             os.makedirs(os.path.dirname(self.full_file_name), exist_ok=True)
             df.to_csv(self.full_file_name, sep=sep, index=False)
+            AppLogger.logger.debug("Saved dataframe to file.")
             return True
         except Exception as error:
             AppLogger.logger.error(f"Error occured during csv_file.save_dataframe: {error}")
