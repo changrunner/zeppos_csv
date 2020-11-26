@@ -5,7 +5,7 @@ from os import path, makedirs
 import pandas as pd
 
 class CsvFiles(Files):
-    def __init__(self, base_dir, extension="*", start_file_filter=None, end_file_filter=None,
+    def __init__(self, base_dir, extension="*.csv", start_file_filter=None, end_file_filter=None,
                  include_processed=False):
         super().__init__(base_dir, extension, start_file_filter, end_file_filter,
                          include_processed, CsvFile)
