@@ -88,9 +88,11 @@ class CsvFile(File):
 
     @staticmethod
     def to_sql_server(pandas_dataframe, sql_configuration,
-                      use_existing=False):
-        dataframe = Dataframe.to_sqlserver_creating_instance(pandas_dataframe, sql_configuration,
-                                                             use_existing=use_existing)
+                      use_existing=False, csv_full_file_name=None):
+        dataframe = Dataframe.to_sqlserver_creating_instance(pandas_dataframe=pandas_dataframe,
+                                                             sql_configuration=sql_configuration,
+                                                             use_existing=use_existing,
+                                                             csv_full_file_name=csv_full_file_name)
         return {"columns": dataframe.pandas_dataframe.columns.to_list()}
 
     def to_sql_server_with_chunking(self, pandas_dataframe_chunks, sql_configuration, use_existing=False):
@@ -111,7 +113,8 @@ class CsvFile(File):
                     return_dict = self.to_sql_server(
                         pandas_dataframe=pandas_dataframe_chunk,
                         sql_configuration=sql_configuration,
-                        use_existing=use_existing
+                        use_existing=use_existing,
+                        csv_full_file_name=self.full_file_name
                     )
 
                     use_existing = True

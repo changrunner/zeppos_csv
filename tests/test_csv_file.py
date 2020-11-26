@@ -143,7 +143,7 @@ class TestProjectMethods(unittest.TestCase):
             )
         )
 
-        self.assertEqual(["SECONDS", "MINUTES", 'AUDIT_CREATE_UTC_DATETIME'], return_dict["columns"])
+        self.assertEqual(["SECONDS", "MINUTES", 'AUDIT_CREATE_UTC_DATETIME', 'CSV_FILE_NAME'], return_dict["columns"])
 
     def test_save_dataframe_method(self):
         csv_file = CsvFile(r"c:\temp\test.csv")
