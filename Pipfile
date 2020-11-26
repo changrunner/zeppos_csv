@@ -17,7 +17,7 @@ pytest = ">=6.1.2"
 testfixtures = ">=6.15.0"
 
 [packages]
-zeppos-bcpy = ">=0.0.23"
+zeppos-bcpy = ">=0.0.25"
 
 [requires]
 python_version = "3.7"
