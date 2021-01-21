@@ -112,9 +112,8 @@ class TestProjectMethods(unittest.TestCase):
     def test_to_sql_server_method(self):
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready1', '', content="seconds|minutes\n3600|12\n")
 
-        csv_file = CsvFile(full_file_name_list[0])
-        return_dict = CsvFile(full_file_name_list[0]).to_sql_server(
-            pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(),
+        return_dict = CsvFile.to_sql_server(
+            pandas_dataframe=CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_with_header(),
             sql_configuration=SqlConfiguration(
                 server_type="microsoft",
                 server_name="localhost\\sqlexpress",
@@ -125,6 +124,23 @@ class TestProjectMethods(unittest.TestCase):
         )
 
         self.assertEqual(["SECONDS", "MINUTES", 'AUDIT_CREATE_UTC_DATETIME'], return_dict["columns"])
+
+    def test_to_sql_server_with_additional_static_info_method(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready1', '', content="seconds|minutes\n3600|12\n")
+
+        return_dict = CsvFile.to_sql_server(
+            pandas_dataframe=CsvFile(full_file_name_list[0]).get_dataframe_utf8_encoding_with_header(),
+            sql_configuration=SqlConfiguration(
+                server_type="microsoft",
+                server_name="localhost\\sqlexpress",
+                database_name="master",
+                schema_name="dbo",
+                table_name="staging_test_to_sql_server2"
+            ),
+            additional_static_data_dict={'static_field1': 'some info 1', 'static_field2': 'some info 2'}
+        )
+
+        self.assertEqual(['SECONDS', 'MINUTES', 'STATIC_FIELD1', 'STATIC_FIELD2', 'AUDIT_CREATE_UTC_DATETIME'], return_dict["columns"])
 
     def test_to_sql_server_with_chunking_method(self):
         # AppLogger.set_debug_level()

@@ -87,10 +87,11 @@ class CsvFile(File):
         return df
 
     @staticmethod
-    def to_sql_server(pandas_dataframe, sql_configuration,
+    def to_sql_server(pandas_dataframe, sql_configuration, additional_static_data_dict=None,
                       use_existing=False, csv_full_file_name=None):
         dataframe = Dataframe.to_sqlserver_creating_instance(pandas_dataframe=pandas_dataframe,
                                                              sql_configuration=sql_configuration,
+                                                             additional_static_data_dict=additional_static_data_dict,
                                                              use_existing=use_existing,
                                                              csv_full_file_name=csv_full_file_name)
         return {"columns": dataframe.pandas_dataframe.columns.to_list()}
