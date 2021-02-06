@@ -2,6 +2,7 @@ import unittest
 from zeppos_csv.csv_files import CsvFiles
 from tests.util_for_testing import UtilForTesting
 from zeppos_bcpy.sql_configuration import SqlConfiguration
+from zeppos_logging.app_logger import AppLogger
 import os
 
 
@@ -19,8 +20,7 @@ class TestProjectMethods(unittest.TestCase):
     def test_to_sql_server_method(self):
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_8', extension="",
                                                                             content="col1,col2\ntest1,test2")
-        csv_files = CsvFiles(file_dir)
-        csv_files.to_sql_server(
+        return_dict = CsvFiles(file_dir).to_sql_server(
             sql_configuration=SqlConfiguration(
                 server_type="microsoft",
                 server_name="localhost\\sqlexpress",
@@ -31,7 +31,7 @@ class TestProjectMethods(unittest.TestCase):
             sep=","
         )
         # if the above statement ran ok then we assume all is ok.
-        self.assertTrue(1 == 1)
+        self.assertEqual(None, return_dict['error'])
 
     # def test_to_sql_server_with_additional_information_method(self):
     #     temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup(r'test_df_9\field1=somedata1\field2=somedata2', extension="",
@@ -50,9 +50,11 @@ class TestProjectMethods(unittest.TestCase):
     #     self.assertTrue(1==1)
 
     def test_to_sql_server_with_chunking_method(self):
+        AppLogger.configure_and_get_logger("test_logger")
+        AppLogger.set_debug_level()
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_8', extension="",
                                                                             content="col1|col2\ntest1|test2")
-        CsvFiles(file_dir).to_sql_server_with_chunking(
+        return_dict = CsvFiles(file_dir).to_sql_server_with_chunking(
             sql_configuration=SqlConfiguration(
                 server_type="microsoft",
                 server_name="localhost\\sqlexpress",
@@ -62,7 +64,7 @@ class TestProjectMethods(unittest.TestCase):
             )
         )
         # if the above statement ran ok then we assume all is ok.
-        self.assertTrue(1==1)
+        self.assertEqual(None, return_dict['error'])
 
     def test_1_get_dataframe_utf8_encoding_with_header_method(self):
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('test_df_2', extension="",

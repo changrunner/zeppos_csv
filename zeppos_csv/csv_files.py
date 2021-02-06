@@ -7,13 +7,21 @@ import pandas as pd
 class CsvFiles(Files):
     def __init__(self, base_dir, extension="csv", start_file_filter=None, end_file_filter=None,
                  include_processed=False):
-        super().__init__(base_dir, extension, start_file_filter, end_file_filter,
-                         include_processed, CsvFile)
+        super().__init__(
+            base_dir=base_dir,
+            extension=extension,
+            start_file_filter=start_file_filter,
+            end_file_filter=end_file_filter,
+            include_processed=include_processed,
+            file_object=CsvFile
+        )
 
     def to_sql_server(self, sql_configuration, use_existing=False, low_memory=True,
                       sep="|", mark_as_processed=False):
+        return_dict = {'error': None}
         for csv_file in self.__iter__():
             try:
+                AppLogger.logger.debug(f"csv_file type: {type(csv_file)}")
                 csv_file.to_sql_server(
                     pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(low_memory=low_memory, sep=sep),
                     sql_configuration=sql_configuration,
@@ -24,14 +32,18 @@ class CsvFiles(Files):
                 if mark_as_processed:
                     csv_file.mark_as_done()
             except Exception as error:
+                return_dict['error'] = error
                 AppLogger.logger.error(f"Error to_sql_server: {error}")
                 if mark_as_processed:
                     csv_file.mark_as_fail()
+        return return_dict
 
     def to_sql_server_with_chunking(self, sql_configuration, use_existing=False, low_memory=True,
                                     sep="|", mark_as_processed=False):
+        return_dict = {'error': None}
         for csv_file in self.__iter__():
             try:
+                AppLogger.logger.debug(f"csv_file type: {type(csv_file)}")
                 csv_file.to_sql_server_with_chunking(
                     pandas_dataframe_chunks=csv_file.get_dataframe_utf8_encoding_with_header_and_chunking(
                         low_memory=low_memory,
@@ -44,9 +56,11 @@ class CsvFiles(Files):
                 if mark_as_processed:
                     csv_file.mark_as_done()
             except Exception as error:
+                return_dict['error'] = error
                 AppLogger.logger.error(f"Error to_sql_server_with_chunking: {error}")
                 if mark_as_processed:
                     csv_file.mark_as_fail()
+        return return_dict
 
     def get_dataframe_utf8_encoding_with_header(self, column_data_type_dict=None, low_memory=True):
         df_final = pd.DataFrame()
