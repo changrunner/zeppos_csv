@@ -89,51 +89,62 @@ class CsvFile(File):
     @staticmethod
     def to_sql_server(pandas_dataframe, sql_configuration, additional_static_data_dict=None,
                       use_existing=False, csv_full_file_name=None):
-        dataframe = Dataframe.to_sqlserver_creating_instance(pandas_dataframe=pandas_dataframe,
-                                                             sql_configuration=sql_configuration,
-                                                             additional_static_data_dict=additional_static_data_dict,
-                                                             use_existing=use_existing,
-                                                             csv_full_file_name=csv_full_file_name)
-        return {"columns": dataframe.pandas_dataframe.columns.to_list()}
+        return_dict = {'columns': None, 'error': None}
+        try:
+            dataframe = Dataframe.to_sqlserver_creating_instance(pandas_dataframe=pandas_dataframe,
+                                                                 sql_configuration=sql_configuration,
+                                                                 additional_static_data_dict=additional_static_data_dict,
+                                                                 use_existing=use_existing,
+                                                                 csv_full_file_name=csv_full_file_name)
+            return_dict['columns'] = dataframe.pandas_dataframe.columns.to_list()
+        except Exception as error:
+            return_dict['error'] = error
+            AppLogger.logger.error(f"===> Error Occurred. Error: {error}")
+
+        return return_dict
 
     def to_sql_server_with_chunking(self, pandas_dataframe_chunks, sql_configuration, use_existing=False):
         self._timer.start_timer()
 
         total_record_count = 0
         chunk_counter = 1
-        error = None
         return_dict = None
         for pandas_dataframe_chunk in pandas_dataframe_chunks:
+            AppLogger.logger.debug("-----------")
             AppLogger.logger.debug(f"Chunk No: {chunk_counter}")
             AppLogger.logger.debug(f"CSV File Name: {self.file_name}")
-            AppLogger.logger.debug(f"Error Occured?: {error is not None}")
-            if not error:
-                try:
-                    total_record_count += pandas_dataframe_chunk.shape[0]
+            AppLogger.logger.debug(f"Error Occured?: {self._error_occured(return_dict)}")
+            if not self._error_occured(return_dict):
+                AppLogger.logger.debug(f"record_count: {pandas_dataframe_chunk.shape[0]}")
+                total_record_count += pandas_dataframe_chunk.shape[0]
+                AppLogger.logger.debug(f"total_record_count: {total_record_count}")
 
-                    return_dict = self.to_sql_server(
-                        pandas_dataframe=pandas_dataframe_chunk,
-                        sql_configuration=sql_configuration,
-                        use_existing=use_existing,
-                        csv_full_file_name=self.full_file_name
-                    )
+                return_dict = self.to_sql_server(
+                    pandas_dataframe=pandas_dataframe_chunk,
+                    sql_configuration=sql_configuration,
+                    use_existing=use_existing,
+                    csv_full_file_name=self.full_file_name
+                )
 
-                    use_existing = True
-                except Exception as e:
-                    AppLogger.logger.error(f"===> Error Occured. See further detail later in this log. {e}")
-                    error = e
-                    total_record_count = 0
+                use_existing = True
 
             chunk_counter += 1
 
         self._timer.stop_timer()
-        if error:
-            AppLogger.logger.info(f"Error => No records processed in seconds: {self._timer.time_elapsed_in_seconds}")
+        if self._error_occured(return_dict):
+            AppLogger.logger.error(f"Error => [{total_record_count}] records processed in seconds: {self._timer.time_elapsed_in_seconds}")
         else:
             AppLogger.logger.info(
                 f"Processing of [{total_record_count}] records to load Csv into Sql Server in seconds: {self._timer.time_elapsed_in_seconds}")
 
         return return_dict
+
+    def _error_occured(self, return_dict):
+        if return_dict is None:
+            return False
+        if return_dict['error'] is None:
+            return False
+        return True
 
     def save_dataframe(self, df, sep="|"):
         try:

@@ -124,6 +124,7 @@ class TestProjectMethods(unittest.TestCase):
         )
 
         self.assertEqual(["SECONDS", "MINUTES", 'AUDIT_CREATE_UTC_DATETIME'], return_dict["columns"])
+        self.assertEqual(None, return_dict["error"])
 
     def test_to_sql_server_with_additional_static_info_method(self):
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready1', '', content="seconds|minutes\n3600|12\n")
@@ -141,9 +142,10 @@ class TestProjectMethods(unittest.TestCase):
         )
 
         self.assertEqual(['SECONDS', 'MINUTES', 'STATIC_FIELD1', 'STATIC_FIELD2', 'AUDIT_CREATE_UTC_DATETIME'], return_dict["columns"])
+        self.assertEqual(None, return_dict["error"])
 
     def test_to_sql_server_with_chunking_method(self):
-        # AppLogger.set_debug_level()
+        AppLogger.set_debug_level()
         temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup('ready2', '',
                                                                             content="seconds|minutes\n3600|12\n3600|13\n3600|14\n3600|15\n3600|16\n")
 
@@ -155,11 +157,12 @@ class TestProjectMethods(unittest.TestCase):
                 server_name="localhost\\sqlexpress",
                 database_name="master",
                 schema_name="dbo",
-                table_name="staging_test_to_sql_server"
+                table_name="staging_test_to_sql_server3",
             )
         )
 
         self.assertEqual(["SECONDS", "MINUTES", 'AUDIT_CREATE_UTC_DATETIME', 'CSV_FILE_NAME'], return_dict["columns"])
+        self.assertEqual(None, return_dict["error"])
 
     def test_save_dataframe_method(self):
         csv_file = CsvFile(r"c:\temp\test.csv")
