@@ -48,6 +48,21 @@ class TestProjectMethods(unittest.TestCase):
         # if the above statement ran ok then we assume all is ok.
         self.assertEqual(None, return_dict['error'])
 
+    def test_to_sql_server_no_table_name_method(self):
+        temp_dir, file_dir, full_file_name_list = UtilForTesting.file_setup(r'test_df_10', extension="",
+                                                                            content="col1,col2\ntest1,test2")
+        return_dict = CsvFiles(file_dir).to_sql_server(
+            sql_configuration=SqlConfiguration(
+                server_type="microsoft",
+                server_name="localhost\\sqlexpress",
+                database_name="master",
+                schema_name="dbo",
+                table_name=None
+            )
+        )
+        # if the above statement ran ok then we assume all is ok.
+        self.assertEqual(None, return_dict['error'])
+
     def test_to_sql_server_with_chunking_method(self):
         AppLogger.configure_and_get_logger("test_logger")
         AppLogger.set_debug_level()
