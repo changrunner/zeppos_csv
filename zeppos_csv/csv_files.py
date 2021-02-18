@@ -7,14 +7,15 @@ import pandas as pd
 
 class CsvFiles(Files):
     def __init__(self, base_dir, extension="csv", start_file_filter=None, end_file_filter=None,
-                 include_processed=False):
+                 include_processed=False, include_subdir=False):
         super().__init__(
             base_dir=base_dir,
             extension=extension,
             start_file_filter=start_file_filter,
             end_file_filter=end_file_filter,
             include_processed=include_processed,
-            file_object=CsvFile
+            file_object=CsvFile,
+            include_subdir=include_subdir
         )
 
     def to_sql_server(self, sql_configuration, use_existing=False, low_memory=True,
@@ -25,8 +26,11 @@ class CsvFiles(Files):
                 AppLogger.logger.debug(f"csv_file type: {type(csv_file)}")
                 csv_file.to_sql_server(
                     pandas_dataframe=csv_file.get_dataframe_utf8_encoding_with_header(low_memory=low_memory, sep=sep),
-                    sql_configuration=sql_configuration,
-                    use_existing=use_existing
+                    sql_configuration=sql_configuration.validate_and_augment(
+                        file_name_without_extension=csv_file.file_name_without_extension
+                    ),
+                    use_existing=use_existing,
+                    additional_static_data_dict=csv_file.additional_data_from_directory
                 )
                 use_existing = True  # set to True so we don't keep creating the table.
 
