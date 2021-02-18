@@ -17,6 +17,7 @@ class CsvFiles(Files):
             file_object=CsvFile,
             include_subdir=include_subdir
         )
+        self._same_structure_with_in_directory = True
 
     def to_sql_server(self, sql_configuration, use_existing=False, low_memory=True,
                       sep="|", mark_as_processed=False):
@@ -32,7 +33,8 @@ class CsvFiles(Files):
                     use_existing=use_existing,
                     additional_static_data_dict=csv_file.additional_data_from_directory
                 )
-                use_existing = True  # set to True so we don't keep creating the table.
+                if self._same_structure_with_in_directory:
+                    use_existing = True  # set to True so we don't keep creating the table.
 
                 if mark_as_processed:
                     csv_file.mark_as_done()
@@ -42,6 +44,17 @@ class CsvFiles(Files):
                 if mark_as_processed:
                     csv_file.mark_as_fail()
         return return_dict
+
+    def to_sql_server_different_structure_within_directory(self, sql_configuration, use_existing=False,
+                                                           low_memory=True, sep="|", mark_as_processed=False):
+        self._same_structure_with_in_directory = False
+        self.to_sql_server(
+            sql_configuration=sql_configuration,
+            use_existing=use_existing,
+            low_memory=low_memory,
+            sep=sep,
+            mark_as_processed=mark_as_processed
+        )
 
     def to_sql_server_with_chunking(self, sql_configuration, use_existing=False, low_memory=True,
                                     sep="|", mark_as_processed=False):
